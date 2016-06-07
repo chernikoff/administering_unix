@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 		printf("file_name=%s\n", file_name.c_str());
 		result = stat(file_name.c_str(), &buf);
 //		if(result == -1 && errno == ENOENT) {
-		int fd = open(file_name.c_str(), O_WRONLY | O_SYNC | O_CREAT, 0644);
+		int fd = open(file_name.c_str(), O_WRONLY | O_CREAT, 0644);
 		if(fd == -1) {
 			fprintf(stderr, "Error opening/creating a file, error: %s", strerror(errno));
 			exit(EXIT_FAILURE);
