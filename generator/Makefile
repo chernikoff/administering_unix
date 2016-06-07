@@ -5,3 +5,6 @@ generator: generator.o
 
 generator.o: generator.cpp
 	g++ -g -std=c++11 -c generator.cpp
+
+install: generator
+	install -m 0755 generator /usr/bin/generator
