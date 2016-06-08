@@ -48,6 +48,7 @@ int main( int argc, char* argv[] )
     return -1;
   }
 
+  // Ask befor deleting
   char answer;
   while ( answer != 'y' && answer != 'n' ) {
     std::cout << "Are you shure for delete files in " << catalog_path << "\n y/n? ";
