@@ -3,22 +3,23 @@
 #include <condition_variable>
 #include <atomic>
 
-template < typename T >
+template < typename T, size_t max_size = 1000, size_t delta = max_size / 10 >
 class Queue {
 public:
   Queue()
     : m_is_open( true )
     {}
 
-  T pop()
+  T& take()
   {
     std::unique_lock < std::mutex > lock( m_mutex );
-    while( m_is_open && m_queue.empty() ) {
-      m_cond.wait( lock );
-    }
-    auto item = m_queue.front();
+    return m_queue.front();
+  }
+
+  void pop()
+  {
+    std::unique_lock < std::mutex > lock ( m_mutex );
     m_queue.pop();
-    return item;
   }
 
   void push( const T &item )
@@ -31,13 +32,24 @@ public:
 
   bool isOpen() const
   {
-    return m_is_open || !m_queue.empty();
+    return m_is_open;
   }
 
   void close()
   {
     m_is_open = false;
     m_cond.notify_one();
+  }
+
+  bool hasNext() const
+  {
+    return !m_queue.empty();
+  }
+
+  void wait()
+  {
+    std::unique_lock < std::mutex > lock( m_mutex );
+    m_cond.wait( lock );
   }
 
 private:
