@@ -48,6 +48,14 @@ int main( int argc, char* argv[] )
     return -1;
   }
 
+  char answer;
+  while ( answer != 'y' && answer != 'n' ) {
+    std::cout << "Are you shure for delete files in " << catalog_path << "\n y/n? ";
+    std::cin >> answer;
+  }
+
+  if ( answer == 'n' ) return 0;
+
   Queue < std::string > queue;
 
   std::thread reader( [ &dir, &queue] () {
