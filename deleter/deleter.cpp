@@ -60,12 +60,10 @@ int main( int argc, char* argv[] )
   Queue < std::string > queue;
 
   std::thread reader( [ &dir, &queue] () {
-    std::cout << "Reader\n";
     dirent *entry;
     while( ( entry = readdir( dir.get() ) ) != nullptr ) {
       std::string name( entry->d_name );
       if( name != "."  &&  name != ".." ) {
-        std::cout << "Push\n";
         queue.push( entry->d_name );
       }
     }
@@ -74,15 +72,13 @@ int main( int argc, char* argv[] )
   } );
 
   std::thread deleter( [ &catalog_path, &queue ] () {
-    std::cout << "Deleter\n";
     size_t num_deleted = 0;
     while( queue.isOpen() || queue.hasNext() ) {
       if ( queue.hasNext() ) {
         auto file_name = queue.take();
         auto full_path = catalog_path + file_name;
         num_deleted++;
-        std::cout << full_path << '\n';
-        //remove( full_path.c_str() );
+        remove( full_path.c_str() );
         queue.pop();
       } else {
         queue.wait();
