@@ -38,6 +38,13 @@ int main( int argc, char* argv[] )
   // Add slash for valid full path
   if( catalog_path.back() != '/' ) catalog_path += '/';
 
+  // Ask befor deleting
+  char answer;
+  while ( answer != 'y' && answer != 'n' ) {
+    std::cout << "Are you shure for delete files in " << catalog_path << "\n y/n? ";
+    std::cin >> answer;
+  }
+
   // Open directory
   auto dir_deleter = [] ( DIR *dir ) { if( dir ) closedir( dir ); };
   std::unique_ptr < DIR, decltype( dir_deleter ) > dir( opendir( catalog_path.c_str() ), dir_deleter );
@@ -46,13 +53,6 @@ int main( int argc, char* argv[] )
   } else {
     std::cout << "Error! Can't open directory, error: " << strerror( errno ) << '\n';
     return -1;
-  }
-
-  // Ask befor deleting
-  char answer;
-  while ( answer != 'y' && answer != 'n' ) {
-    std::cout << "Are you shure for delete files in " << catalog_path << "\n y/n? ";
-    std::cin >> answer;
   }
 
   if ( answer == 'n' ) return 0;
