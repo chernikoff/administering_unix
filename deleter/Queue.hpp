@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <atomic>
 
-template < typename T, size_t max_size = 1000, size_t delta = max_size / 10 >
+template < typename T >
 class Queue {
 public:
   Queue()
