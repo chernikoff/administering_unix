@@ -67,25 +67,38 @@ int main( int argc, char* argv[] )
         queue.push( entry->d_name );
       }
     }
-    std::cout << "End direcrory reading\n";
     queue.close();
   } );
 
   std::thread deleter( [ &catalog_path, &queue ] () {
     size_t num_deleted = 0;
+    std::cout << '\n';
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     while( queue.isOpen() || queue.hasNext() ) {
       if ( queue.hasNext() ) {
         auto file_name = queue.take();
         auto full_path = catalog_path + file_name;
-        num_deleted++;
         remove( full_path.c_str() );
+        num_deleted++;
+        if ( !( num_deleted % 1000 ) ) {
+          std::cout << "\r" << num_deleted / 1000 << "K";
+          std::cout.flush();
+        }
         queue.pop();
       } else {
         queue.wait();
       }
     }
-    std::cout << "End deleting files. Deleted " << num_deleted << " files\n";
+    std::cout << '\n';
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::time_t total_seconds = std::chrono::duration_cast< std::chrono::seconds >( end - start ).count();
+    std::size_t minutes = static_cast< size_t >( total_seconds ) / 60;
+    std::size_t seconds = static_cast< size_t >( total_seconds ) % 60;
+    std::cout << "Deleted " << num_deleted << " files,\n"
+              << "time spent " << minutes << "m:" << seconds << "s,\n"
+              << "avg " << num_deleted / total_seconds << " files per second\n";
   } );
+
 
   // Wait for finish
   reader.join();
