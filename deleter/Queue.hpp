@@ -12,6 +12,7 @@ public:
 
   T& take()
   {
+    std::unique_lock < std::mutex > lock ( m_mutex );
     return m_queue.front();
   }
 
@@ -26,7 +27,7 @@ public:
     std::unique_lock < std::mutex > lock( m_mutex );
     m_queue.push( item );
     lock.unlock();
-    m_cond.notify_one();
+    m_cond.notify_all();
   }
 
   bool isOpen() const
@@ -37,11 +38,12 @@ public:
   void close()
   {
     m_is_open = false;
-    m_cond.notify_one();
+    m_cond.notify_all();
   }
 
-  bool hasNext() const
+  bool hasNext()
   {
+    std::unique_lock < std::mutex > lock( m_mutex );
     return !m_queue.empty();
   }
 
