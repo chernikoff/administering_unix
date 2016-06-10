@@ -10,16 +10,24 @@ public:
     : m_is_open( true )
     {}
 
-  T& take()
+  bool getNext(T& next)
   {
     std::unique_lock < std::mutex > lock ( m_mutex );
-    return m_queue.front();
-  }
-
-  void pop()
-  {
-    std::unique_lock < std::mutex > lock ( m_mutex );
+    while (m_is_open) {
+	if (m_queue.empty()) {
+            lock.unlock();
+	    sleep(1);
+            lock.try_lock();
+   	} else {
+	    break;
+	}
+    }
+    if (m_queue.empty()) {
+	    return false;
+    }
+    next = m_queue.front();
     m_queue.pop();
+    return true;
   }
 
   void push( const T &item )
@@ -30,21 +38,10 @@ public:
     m_cond.notify_all();
   }
 
-  bool isOpen() const
-  {
-    return m_is_open;
-  }
-
   void close()
   {
     m_is_open = false;
     m_cond.notify_all();
-  }
-
-  bool hasNext()
-  {
-    std::unique_lock < std::mutex > lock( m_mutex );
-    return !m_queue.empty();
   }
 
   void wait()

@@ -74,9 +74,8 @@ int main( int argc, char* argv[] )
     size_t num_deleted = 0;
     std::cout << '\n';
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    while( queue.isOpen() || queue.hasNext() ) {
-      if ( queue.hasNext() ) {
-        auto file_name = queue.take();
+    std::string file_name;
+    while( queue.getNext(file_name) ) {
         auto full_path = catalog_path + file_name;
         remove( full_path.c_str() );
         num_deleted++;
@@ -84,10 +83,6 @@ int main( int argc, char* argv[] )
           std::cout << "\r" << num_deleted / 1000 << "K";
           std::cout.flush();
         }
-        queue.pop();
-      } else {
-        queue.wait();
-      }
     }
     std::cout << '\n';
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
