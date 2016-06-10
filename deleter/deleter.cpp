@@ -70,7 +70,7 @@ int main( int argc, char* argv[] )
     queue.close();
   } );
 
-  std::thread deleter( [ &catalog_path, &queue ] () {
+  auto deleter_func =  [ &catalog_path, &queue ] () {
     size_t num_deleted = 0;
     std::cout << '\n';
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
@@ -97,12 +97,14 @@ int main( int argc, char* argv[] )
     std::cout << "Deleted " << num_deleted << " files,\n"
               << "time spent " << minutes << "m:" << seconds << "s,\n"
               << "avg " << num_deleted / total_seconds << " files per second\n";
-  } );
-
+  };
+  std::thread deleter1( deleter_func );
+  std::thread deleter2( deleter_func );
 
   // Wait for finish
   reader.join();
-  deleter.join();
+  deleter1.join();
+  deleter2.join();
 
   return 0;
 }
